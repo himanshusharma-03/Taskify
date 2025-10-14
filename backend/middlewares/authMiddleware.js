@@ -1,17 +1,18 @@
 const jwt = require("jsonwebtoken");
-const user = require("../models/user");
+const User = require("../models/user");
 
 
 //Middleware tp protect routes
 const protect = async(req , res, next)=>{
     try{
-        let token = req.headers.authorization;
 
+        let token = req.headers.authorization;
 
         if(token && token.startsWith("Bearer")){
             token = token.split(" ")[1]; //Extract token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            req.user = await user.findById(decoded.id).select("-password");
+
+            req.user = await User.findById(decoded.id).select("-password");
             next();
 
         }else{
@@ -19,14 +20,16 @@ const protect = async(req , res, next)=>{
         }
 
     }catch(error){
-        res.status(401).json({message:"Token failed", error: error.message});
+        res.status(401).json({message:error.message, error: error.message});
     }
 };
 
 
 //Middleware for Admin - only access
 const adminOnly = (req, res, next) =>{
+
     if(req.user && req.user.role === "admin"){
+
         next();
     }else{
         res.status(403).json({message:"Acess denied, admin only"});

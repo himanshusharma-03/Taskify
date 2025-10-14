@@ -4,14 +4,14 @@ const bcrypt = require('bcrypt');
 
 //Generate JWT Token
 const generateToken = (userId) =>{
-    return jwt.sign({id: userId},process.env.JWT_SCERET,{ expiresIn: "7d"});
+    return jwt.sign({id: userId},process.env.JWT_SECRET,{ expiresIn: "7d"});
 };
 //@desc  register a new user
 //@route POST/API/auth/register
 //@access public
 const registerUser = async(req, res)=>{
     try{
-        const { name, email, password,profileTmageUrl,adminInviteToken }=req.body;
+        const { name, email, password,profileTmageUrl,adminInviteToken ,role}=req.body;
 
         //check if user already exists
         const userExists = await User.findOne({email});
@@ -20,13 +20,14 @@ const registerUser = async(req, res)=>{
         }
 
         //Determine user role: Admin if correct token is provided, otherwise Member
-        let role = "member";
-        if(
-            adminInviteToken && 
-            adminInviteToken == process.env.ADMIN_INVITE_TOKEN
-        ){
-            role = "admin";
-        }
+
+        // let role = "member";
+        // if(
+        //     adminInviteToken && 
+        //     adminInviteToken == process.env.ADMIN_INVITE_TOKEN
+        // ){
+        //     role = "admin";
+        // }
 
 
         //hash password
@@ -103,7 +104,7 @@ const loginUser = async(req,res) => {
 
 const getUserProfile = async(req,res) => {
     try{
-        const user = await user.findByID(req.user.id).select("-password");
+        const user = await User.findById(req.user.id).select("-password");
         if(!user){
             return res.status(404).json({message: "user not found"});
         }
