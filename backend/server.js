@@ -12,6 +12,7 @@ const reportRoutes = require("./routes/reportRoutes");
 
 
 const app = express();
+console.log(process.env.CLIENT_URL )
 
 
 //Middleware to handle CORS
